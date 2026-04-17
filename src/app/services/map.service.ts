@@ -12,7 +12,7 @@ import {
 } from '../modules/openlayers.module';
 
 /** Coordenadas iniciales del centro del mapa (longitud, latitud) */
-export const INITIAL_CENTER = [-75.0152, -9.1900];
+export const INITIAL_CENTER = [-75.0152, -8.65000];
 /** Nivel de zoom inicial del mapa */
 export const INITIAL_ZOOM = 6;
 /** URL del servicio de mapas satelitales de Google */
