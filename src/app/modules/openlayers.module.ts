@@ -5,7 +5,7 @@ import OlMap from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
-import Overlay from 'ol/Overlay';
+import Overlay, { Positioning as OverlayPositioning } from 'ol/Overlay';
 import XYZ from 'ol/source/XYZ';
 import VectorSource from 'ol/source/Vector';
 import { defaults as defaultControls, OverviewMap, ScaleLine, FullScreen, ZoomSlider } from 'ol/control';
@@ -28,6 +28,7 @@ export {
   View,
   TileLayer,
   Overlay,
+  type OverlayPositioning,
   VectorLayer,
   XYZ,
   VectorSource,
