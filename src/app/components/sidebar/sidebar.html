@@ -1,10 +1,10 @@
 <!-- Rail Lateral (Toolbar Estilo Indigo) -->
-<aside class="absolute left-0 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-r-lg bg-primary/25 p-2 backdrop-blur-sm shadow-xl">
+<aside class="absolute left-0 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-r-lg bg-primary p-2 backdrop-blur-sm shadow-xl">
   <button
     *ngFor="let item of menuItems"
     (click)="setActive(item)"
     [class.bg-white/20]="item.active"
-    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all size-10 text-white hover:bg-white/10 outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+    class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all size-10 text-white hover:bg-secondary outline-none focus-visible:ring-2 focus-visible:ring-white/50"
     [title]="item.label">
     <i class="bi" [ngClass]="item.icon" style="font-size: 1.2rem;"></i>
     <span class="sr-only">{{ item.label }}</span>

@@ -15,6 +15,7 @@ export class Sidebar {
   // Mock de ítems de navegación
   menuItems = [
     { id: 'search', icon: 'bi bi-search', label: 'Buscar', active: false },
+    { id: 'searchint', icon: 'bi bi-funnel-fill', label: 'Busqueda Avanzada', active: false },
     { id: 'layers', icon: 'bi bi-layers', label: 'Capas', active: true },
     { id: 'legend', icon: 'bi bi-map', label: 'Leyenda', active: false },
     { id: 'print', icon: 'bi bi-printer', label: 'Imprimir', active: false },

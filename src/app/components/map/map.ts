@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { MapService } from '../../services/map.service';
 import OlMap from 'ol/Map';
 
-
 import { Menubar } from '../menubar/menubar';
 import { Sidebar } from '../sidebar/sidebar';
 
@@ -27,6 +26,8 @@ export class MapComponent {
   isReady = false; // Estado para controlar la visibilidad inicial
 
   private mapService = inject(MapService);
+  private cdr = inject(ChangeDetectorRef);
+
   constructor() {
     // afterNextRender asegura que el mapa se inicialice solo en el cliente (navegador)
     afterNextRender(() => {
@@ -36,7 +37,34 @@ export class MapComponent {
   private initMap(): void {
     // Utilizamos el servicio para inicializar el mapa centralizando la lógica
     this.olMap = this.mapService.initMap(this.mapContainer.nativeElement);
+
+    // Activamos el estado isReady para mostrar los controles en el HTML
+    this.isReady = true;
+
+    // Forzamos la detección de cambios para que el @if en el HTML se active
+    this.cdr.detectChanges();
   }
 
+  /**
+   * Incrementa el nivel de zoom actual del mapa
+   */
+  zoomIn(): void {
+    const view = this.olMap?.getView();
+    const zoom = view?.getZoom();
+    if (view && zoom !== undefined) {
+      view.animate({ zoom: zoom + 1, duration: 250 });
+    }
+  }
+
+  /**
+   * Decrementa el nivel de zoom actual del mapa
+   */
+  zoomOut(): void {
+    const view = this.olMap?.getView();
+    const zoom = view?.getZoom();
+    if (view && zoom !== undefined) {
+      view.animate({ zoom: zoom - 1, duration: 250 });
+    }
+  }
 
 }
