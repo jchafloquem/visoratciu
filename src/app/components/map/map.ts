@@ -23,8 +23,11 @@ import { Sidebar } from '../sidebar/sidebar';
 export class MapComponent {
   @ViewChild('mapContainer') mapContainer!: ElementRef;
   @ViewChild('userMarker') userMarker!: ElementRef;
+  @ViewChild('locationPopup') locationPopup!: ElementRef;
+
   olMap?: OlMap;
   isReady = false; // Estado para controlar la visibilidad inicial
+  userCoords: { lon: number, lat: number } | null = null;
 
   private mapService = inject(MapService);
   private cdr = inject(ChangeDetectorRef);
@@ -56,7 +59,6 @@ export class MapComponent {
       view.animate({ zoom: zoom + 1, duration: 250 });
     }
   }
-
   /**
    * Decrementa el nivel de zoom actual del mapa
    */
@@ -87,12 +89,20 @@ export class MapComponent {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const coords = [position.coords.longitude, position.coords.latitude];
+          this.userCoords = { lon: position.coords.longitude, lat: position.coords.latitude };
 
           // Hacemos visible el marcador (estaba en display: none en el CSS)
           this.userMarker.nativeElement.style.display = 'flex';
+          this.locationPopup.nativeElement.style.display = 'block';
 
           // Actualizar el Overlay animado
           this.mapService.updateUserLocationOverlay(coords, this.userMarker.nativeElement);
+
+          // Mostrar el popup con datos
+          this.mapService.showLocationPopup(coords, this.locationPopup.nativeElement);
+
+          // Forzamos la detección de cambios para que Angular pinte las coordenadas en el popup
+          this.cdr.detectChanges();
 
           this.olMap?.getView().animate({
             center: fromLonLat(coords),
@@ -101,12 +111,27 @@ export class MapComponent {
           });
         },
         (error) => {
-          console.warn('Error al obtener la ubicación:', error);
+          alert('Error al obtener la ubicación:' + error.message);
+        },
+        {
+          enableHighAccuracy: true, // Intenta obtener la mejor precisión (GPS)
+          timeout: 10000,           // Espera máxima de 10 segundos
+          maximumAge: 0             // No utiliza coordenadas cacheadas antiguas
         }
       );
     } else {
       alert('La geolocalización no está disponible en su navegador.');
     }
+  }
+
+  /**
+   * Oculta el marcador y el popup del mapa
+   */
+  removeLocationMarker(): void {
+    this.mapService.clearUserLocation();
+    this.userCoords = null;
+    this.userMarker.nativeElement.style.display = 'none';
+    this.locationPopup.nativeElement.style.display = 'none';
   }
 
 }

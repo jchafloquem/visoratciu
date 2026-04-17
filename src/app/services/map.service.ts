@@ -29,6 +29,7 @@ export class MapService {
   private map?: OlMap;
   private locationSource = new VectorSource(); // Fuente para el marcador de ubicación
   private locationOverlay?: Overlay;
+  private popupOverlay?: Overlay;
 
   initMap(target: HTMLElement): OlMap {
     // Fuente de Google Satellite (reutilizada para el OverviewMap)
@@ -89,6 +90,32 @@ export class MapService {
       this.map?.addOverlay(this.locationOverlay);
     }
     this.locationOverlay.setPosition(fromLonLat(lonLat));
+  }
+
+  /**
+   * Muestra un popup en la ubicación especificada
+   * @param lonLat Coordenadas [longitud, latitud]
+   * @param element Elemento HTML del popup
+   */
+  showLocationPopup(lonLat: number[], element: HTMLElement): void {
+    if (!this.popupOverlay) {
+      this.popupOverlay = new Overlay({
+        element: element,
+        positioning: 'bottom-center',
+        stopEvent: true, // Permite interactuar con los botones dentro del popup
+        offset: [0, -15] // Separación vertical respecto al punto
+      });
+      this.map?.addOverlay(this.popupOverlay);
+    }
+    this.popupOverlay.setPosition(fromLonLat(lonLat));
+  }
+
+  /**
+   * Oculta el marcador de ubicación y su popup
+   */
+  clearUserLocation(): void {
+    this.locationOverlay?.setPosition(undefined);
+    this.popupOverlay?.setPosition(undefined);
   }
 
   destroyMap(): void {

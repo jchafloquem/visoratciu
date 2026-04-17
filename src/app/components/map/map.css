@@ -22,6 +22,11 @@
   display: none;
 }
 
+/* Estilo para el popup */
+#locationPopup {
+  display: none;
+}
+
 /* Posiciona el OverviewMap a la derecha */
 ::ng-deep .ol-overviewmap {
   left: auto !important;
