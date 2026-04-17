@@ -22,6 +22,7 @@ import { Sidebar } from '../sidebar/sidebar';
 })
 export class MapComponent {
   @ViewChild('mapContainer') mapContainer!: ElementRef;
+  @ViewChild('userMarker') userMarker!: ElementRef;
   olMap?: OlMap;
   isReady = false; // Estado para controlar la visibilidad inicial
 
@@ -76,6 +77,36 @@ export class MapComponent {
       zoom: INITIAL_ZOOM,
       duration: 500 // Animación de medio segundo
     });
+  }
+
+  /**
+   * Obtiene la ubicación actual del usuario y centra el mapa
+   */
+  getCurrentLocation(): void {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = [position.coords.longitude, position.coords.latitude];
+
+          // Hacemos visible el marcador (estaba en display: none en el CSS)
+          this.userMarker.nativeElement.style.display = 'flex';
+
+          // Actualizar el Overlay animado
+          this.mapService.updateUserLocationOverlay(coords, this.userMarker.nativeElement);
+
+          this.olMap?.getView().animate({
+            center: fromLonLat(coords),
+            zoom: 17, // Zoom cercano para la ubicación
+            duration: 1000
+          });
+        },
+        (error) => {
+          console.warn('Error al obtener la ubicación:', error);
+        }
+      );
+    } else {
+      alert('La geolocalización no está disponible en su navegador.');
+    }
   }
 
 }

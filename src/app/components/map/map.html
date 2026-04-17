@@ -2,6 +2,15 @@
 <app-sidebar></app-sidebar>
 <div #mapContainer class="map-container"></div>
 
+<!-- Marcador de Usuario Animado (Overlay) -->
+<div #userMarker id="userMarker" class="relative flex h-6 w-6 items-center justify-center">
+  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+  <span class="relative inline-flex rounded-full h-4 w-4 bg-blue-600 border-2 border-white shadow-[0_0_10px_rgba(0,0,0,0.5)]"></span>
+</div>
+
+
+
+
 <!-- Controles de Zoom Personalizados -->
 @if (isReady) {
   <div class="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-50 animate-in fade-in duration-500">
@@ -19,6 +28,11 @@
             class="w-10 h-10 flex items-center justify-center bg-primary backdrop-blur-md text-white rounded-xl shadow-lg border border-white/20 hover:bg-secondary hover:scale-105 transition-all active:scale-95"
             title="Vista Inicial">
       <i class="bi bi-house-door-fill text-xl"></i>
+    </button>
+    <button (click)="getCurrentLocation()"
+            class="w-10 h-10 flex items-center justify-center bg-primary backdrop-blur-md text-white rounded-xl shadow-lg border border-white/20 hover:bg-secondary hover:scale-105 transition-all active:scale-95"
+            title="Mi Ubicación">
+      <i class="bi bi-geo-alt-fill text-xl"></i>
     </button>
   </div>
 }
