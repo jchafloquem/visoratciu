@@ -31,6 +31,7 @@ export class MapComponent {
   olMap?: OlMap;
   isReady = this.mapService.isReady;
   userCoords = this.mapService.userCoords;
+  baseLayerType = this.mapService.baseLayerType;
 
   constructor() {
     // afterNextRender asegura que el mapa se inicialice solo en el cliente (navegador)
@@ -61,6 +62,12 @@ export class MapComponent {
    */
   goHome(): void {
     this.mapService.goHome();
+  }
+  /**
+   * Cambia el mapa base delegando la lógica al servicio
+   */
+  toggleBaseLayer(): void {
+    this.mapService.toggleBaseLayer();
   }
   /**
    * Obtiene la ubicación actual delegando la lógica al servicio

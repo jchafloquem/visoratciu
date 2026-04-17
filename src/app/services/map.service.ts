@@ -17,6 +17,8 @@ export const INITIAL_CENTER = [-75.0152, -9.1900];
 export const INITIAL_ZOOM = 6;
 /** URL del servicio de mapas satelitales de Google */
 const GOOGLE_SATELLITE_URL = 'https://mt1.google.com/vt/lyrs=s&hl=es&x={x}&y={y}&z={z}';
+/** URL del servicio de mapas de calles (OpenStreetMap) */
+const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 /** Duración de las animaciones del mapa en milisegundos */
 const ANIMATION_DURATION = 1000;
 /** Nivel de zoom al que se acerca el mapa al obtener la ubicación del usuario */
@@ -37,6 +39,8 @@ export class MapService {
   private locationOverlay?: Overlay;
   /** Overlay para mostrar un popup con información de la ubicación */
   private popupOverlay?: Overlay;
+  private satelliteLayer?: TileLayer;
+  private streetsLayer?: TileLayer;
 
   /**
    * Signal que indica si el mapa ha sido inicializado y está listo para su uso.
@@ -50,6 +54,12 @@ export class MapService {
    * @type {Signal<{ lon: number, lat: number } | null>}
    */
   userCoords = signal<{ lon: number, lat: number } | null>(null);
+
+  /**
+   * Signal que almacena el tipo de mapa base actual.
+   * @type {WritableSignal<'satellite' | 'streets'>}
+   */
+  baseLayerType = signal<'satellite' | 'streets'>('satellite');
 
   /**
    * Inicializa el mapa OpenLayers en el elemento HTML proporcionado.
@@ -66,21 +76,35 @@ export class MapService {
       crossOrigin: 'anonymous'
     });
 
+    const streetsSource = new XYZ({
+      url: OSM_URL,
+      crossOrigin: 'anonymous'
+    });
+
+    // Inicializamos ambas capas con preload para zoom fluido
+    this.satelliteLayer = new TileLayer({
+      source: satelliteSource,
+      properties: { title: 'Satélite' },
+      preload: Infinity,
+      visible: this.baseLayerType() === 'satellite'
+    });
+
+    this.streetsLayer = new TileLayer({
+      source: streetsSource,
+      properties: { title: 'Calles' },
+      preload: Infinity,
+      visible: this.baseLayerType() === 'streets'
+    });
+
     this.map = new OlMap({
       target,
       controls: defaultControls({ zoom: false }).extend([
         new OverviewMap({
-          layers: [new TileLayer({ source: satelliteSource })],
+          layers: [new TileLayer({ source: satelliteSource, preload: Infinity })],
           collapsed: false,
         })
       ]),
-      layers: [
-        new TileLayer({
-          source: satelliteSource,
-          properties: { title: 'Satélite (Google)' },
-          preload: Infinity,
-        }),
-      ],
+      layers: [this.satelliteLayer, this.streetsLayer],
       view: new View({
         center: fromLonLat(INITIAL_CENTER),
         zoom: INITIAL_ZOOM,
@@ -206,6 +230,35 @@ export class MapService {
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     });
+  }
+
+  /**
+   * Cambia el mapa base entre vista satelital y vista de calles.
+   */
+  toggleBaseLayer(): void {
+    if (!this.map || !this.satelliteLayer || !this.streetsLayer) return;
+
+    const isSatellite = this.baseLayerType() === 'satellite';
+    const newType = isSatellite ? 'streets' : 'satellite';
+
+    // Cambio de visibilidad para un efecto limpio (sin parpadeos de carga)
+    this.satelliteLayer.setVisible(!isSatellite);
+    this.streetsLayer.setVisible(isSatellite);
+
+    // Sincronizar el OverviewMap (el mapa pequeño de la esquina)
+    const ovControl = this.map.getControls().getArray().find(c => c instanceof OverviewMap) as OverviewMap;
+    if (ovControl) {
+      const ovMap = ovControl.getOverviewMap();
+      const ovLayer = ovMap.getLayers().getArray()[0] as TileLayer;
+
+      // Actualizamos la fuente del overview para que coincida con el mapa principal
+      ovLayer.setSource(isSatellite
+        ? this.streetsLayer.getSource()!
+        : this.satelliteLayer.getSource()!
+      );
+    }
+
+    this.baseLayerType.set(newType);
   }
 
   goHome(): void {

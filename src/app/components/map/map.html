@@ -54,5 +54,10 @@
             title="Mi Ubicación">
       <i class="bi bi-geo-alt-fill text-xl"></i>
     </button>
+    <button (click)="toggleBaseLayer()"
+            class="w-10 h-10 flex items-center justify-center bg-primary backdrop-blur-md text-white rounded-xl shadow-lg border border-white/20 hover:bg-secondary hover:scale-105 transition-all active:scale-95"
+            [title]="baseLayerType() === 'satellite' ? 'Cambiar a Mapa de Calles' : 'Cambiar a Satélite'">
+      <i class="bi text-xl" [class.bi-map]="baseLayerType() === 'satellite'" [class.bi-layers-half]="baseLayerType() === 'streets'"></i>
+    </button>
   </div>
 }
