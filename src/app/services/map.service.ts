@@ -1,10 +1,15 @@
 import { Injectable, inject } from '@angular/core';
-import OlMap from 'ol/Map';
-import View from 'ol/View';
-import TileLayer from 'ol/layer/Tile';
-import XYZ from 'ol/source/XYZ';
-import { defaults as defaultControls, OverviewMap } from 'ol/control';
-import { fromLonLat } from 'ol/proj';
+import {
+  defaultControls,
+  fromLonLat,
+  OlMap,
+  OverviewMap,
+  TileLayer,
+  View,
+  XYZ
+
+} from '../modules/openlayers.module';
+
 
 
 @Injectable({
