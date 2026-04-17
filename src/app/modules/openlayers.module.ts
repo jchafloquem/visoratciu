@@ -14,13 +14,16 @@ import { Style, Fill, Stroke, Circle, Icon, Text } from 'ol/style';
 import Feature from 'ol/Feature';
 import { Point, LineString, Polygon } from 'ol/geom';
 
+
 /**
  * Este módulo centraliza las herramientas de OpenLayers.
  * Puedes usarlo como un punto central de exportación para simplificar tus componentes.
  */
 @NgModule({
   imports: [CommonModule],
-  exports: []
+  exports: [
+
+  ]
 })
 export class OpenLayersModule { }
 

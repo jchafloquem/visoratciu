@@ -11,6 +11,8 @@ import {
 } from '../modules/openlayers.module';
 
 
+export const INITIAL_CENTER = [-75.0152, -9.1900];
+export const INITIAL_ZOOM = 6;
 
 @Injectable({
   providedIn: 'root'
@@ -48,8 +50,8 @@ export class MapService {
         }),
       ],
       view: new View({
-        center: fromLonLat([-75.0152, -9.1900]), // Centro geográfico de Perú
-        zoom: 6, // Encuadre vertical del territorio peruano
+        center: fromLonLat(INITIAL_CENTER), // Centro geográfico de Perú
+        zoom: INITIAL_ZOOM, // Encuadre vertical del territorio peruano
       }),
     });
     return this.map;

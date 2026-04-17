@@ -1,8 +1,8 @@
-import { Component, ElementRef, ViewChild, afterNextRender, DestroyRef, inject, ChangeDetectorRef } from '@angular/core';
+import { Component, ElementRef, ViewChild, afterNextRender, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MapService } from '../../services/map.service';
-import OlMap from 'ol/Map';
+import { MapService, INITIAL_CENTER, INITIAL_ZOOM } from '../../services/map.service';
+import { OlMap, fromLonLat } from '../../modules/openlayers.module';
 
 import { Menubar } from '../menubar/menubar';
 import { Sidebar } from '../sidebar/sidebar';
@@ -65,6 +65,17 @@ export class MapComponent {
     if (view && zoom !== undefined) {
       view.animate({ zoom: zoom - 1, duration: 250 });
     }
+  }
+
+  /**
+   * Restablece la vista a la posición inicial (Perú)
+   */
+  goHome(): void {
+    this.olMap?.getView().animate({
+      center: fromLonLat(INITIAL_CENTER),
+      zoom: INITIAL_ZOOM,
+      duration: 500 // Animación de medio segundo
+    });
   }
 
 }
