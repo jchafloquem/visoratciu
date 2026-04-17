@@ -125,6 +125,7 @@ export class MapService {
    * @param {HTMLElement} element El elemento DOM que representa el marcador.
    */
   updateUserLocationOverlay(transformedCoords: number[], element: HTMLElement): void {
+    element.style.display = 'flex';
     this.locationOverlay = this.getOrCreateOverlay(this.locationOverlay, element, {
       positioning: 'center-center'
     });
@@ -137,6 +138,7 @@ export class MapService {
    * @param {HTMLElement} element El elemento DOM que representa el popup.
    */
   showLocationPopup(transformedCoords: number[], element: HTMLElement): void {
+    element.style.display = 'block';
     this.popupOverlay = this.getOrCreateOverlay(this.popupOverlay, element, {
       positioning: 'bottom-center',
       stopEvent: true,
@@ -155,6 +157,12 @@ export class MapService {
     // Al poner la posición en undefined, OpenLayers oculta automáticamente el elemento
     this.locationOverlay?.setPosition(undefined);
     this.popupOverlay?.setPosition(undefined);
+
+    // También ocultamos los elementos del DOM para respetar el estado inicial del CSS
+    const marker = this.locationOverlay?.getElement();
+    const popup = this.popupOverlay?.getElement();
+    if (marker) marker.style.display = 'none';
+    if (popup) popup.style.display = 'none';
 
     this.userCoords.set(null);
   }
