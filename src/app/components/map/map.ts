@@ -24,6 +24,7 @@ import { Sidebar } from '../sidebar/sidebar';
 export class MapComponent {
   @ViewChild('mapContainer') mapContainer!: ElementRef;
   olMap?: OlMap;
+  isReady = false; // Estado para controlar la visibilidad inicial
 
   private mapService = inject(MapService);
   constructor() {
@@ -32,21 +33,9 @@ export class MapComponent {
       this.initMap();
     });
   }
-
-
-
-
-
-
-
   private initMap(): void {
     // Utilizamos el servicio para inicializar el mapa centralizando la lógica
     this.olMap = this.mapService.initMap(this.mapContainer.nativeElement);
-
-
-
-
-
   }
 
 

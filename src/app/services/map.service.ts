@@ -22,6 +22,7 @@ export class MapService {
       layers: [
         // Mapa base de Google Satellite (Alta resolución)
         new TileLayer({
+          preload: Infinity, // Carga tiles de otros niveles para evitar cuadros vacíos
           properties: { title: 'Satélite (Google)' },
           source: new XYZ({
             url: 'https://mt1.google.com/vt/lyrs=s&hl=es&x={x}&y={y}&z={z}'

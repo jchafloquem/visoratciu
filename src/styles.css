@@ -7,3 +7,14 @@
   --color-secondary: #2b96d7;
   --font-family-poppins: "Poppins", sans-serif;
 }
+
+/* Elimina el cuadro/borde de selección de OpenLayers y mejora la carga */
+.ol-viewport {
+  outline: none !important;
+  background-color: #0b0e14 !important; /* Fondo oscuro acorde al satélite */
+}
+
+/* Oculta los controles nativos si prefieres una interfaz más limpia */
+.ol-zoom, .ol-attribution {
+  display: none !important;
+}
