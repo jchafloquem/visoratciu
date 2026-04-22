@@ -15,6 +15,9 @@ export class GeoserverService {
   // Rutas base del GeoServer (basadas en tu información)
   private readonly BASE_URL = 'https://geoserver.ue003cofopri.gob.pe/geoserver/rest';
 
+  /** URL base para las peticiones WMS (Web Map Service) */
+  public readonly WMS_URL = 'https://geoserver.ue003cofopri.gob.pe/geoserver/wms';
+
   // Credenciales proporcionadas
   private readonly USER = 'admin';
   private readonly PASS = 'Cofopri$Ue003-+-';
@@ -75,4 +78,5 @@ export class GeoserverService {
       headers: this.getHeaders()
     });
   }
+
 }

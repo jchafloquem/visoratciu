@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import {
   defaultControls,
   fromLonLat,
@@ -20,8 +20,6 @@ const GOOGLE_SATELLITE_URL = 'https://mt1.google.com/vt/lyrs=s&hl=es&x={x}&y={y}
 const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 /** Duración de las animaciones del mapa en milisegundos */
 const ANIMATION_DURATION = 1000;
-/** URL base para las peticiones WMS de GeoServer */
-const GEOSERVER_WMS_URL = 'https://geoserver.ue003cofopri.gob.pe/geoserver/wms';
 /** Nivel de zoom al que se acerca el mapa al obtener la ubicación del usuario */
 const ZOOM_LEVEL_LOCATION = 20;
 
@@ -71,37 +69,17 @@ export class MapService {
   /**
    * Inicializa el mapa OpenLayers en el elemento HTML proporcionado.
    * Configura las capas base, controles y vista inicial.
-   * @param {HTMLElement} target El elemento HTML donde se renderizará el mapa.
-   * @returns {OlMap} La instancia del mapa OpenLayers inicializado.
    */
   initMap(target: HTMLElement): OlMap {
-    // Evita inicializar el mapa si ya existe
     if (this.map) return this.map;
 
-    this.satelliteSource = new XYZ({
-      url: GOOGLE_SATELLITE_URL,
-      crossOrigin: 'anonymous'
-    });
+    // Inicialización de fuentes
+    this.satelliteSource = new XYZ({ url: GOOGLE_SATELLITE_URL, crossOrigin: 'anonymous' });
+    this.streetsSource = new XYZ({ url: OSM_URL, crossOrigin: 'anonymous' });
 
-    this.streetsSource = new XYZ({
-      url: OSM_URL,
-      crossOrigin: 'anonymous'
-    });
-
-    // Inicializamos ambas capas con preload para zoom fluido
-    this.satelliteLayer = new TileLayer({
-      source: this.satelliteSource,
-      properties: { title: 'Satélite' },
-      preload: Infinity,
-      visible: this.baseLayerType() === 'satellite'
-    });
-
-    this.streetsLayer = new TileLayer({
-      source: this.streetsSource,
-      properties: { title: 'Calles' },
-      preload: Infinity,
-      visible: this.baseLayerType() === 'streets'
-    });
+    // Creación de capas base usando método auxiliar
+    this.satelliteLayer = this.createBaseLayer(this.satelliteSource, 'Satélite', 'satellite');
+    this.streetsLayer = this.createBaseLayer(this.streetsSource, 'Calles', 'streets');
 
     this.map = new OlMap({
       target,
@@ -114,6 +92,19 @@ export class MapService {
     });
     this.isReady.set(true);
     return this.map;
+  }
+
+  /**
+   * Método auxiliar para estandarizar la creación de capas base.
+   * @private
+   */
+  private createBaseLayer(source: XYZ, title: string, type: 'satellite' | 'streets'): TileLayer {
+    return new TileLayer({
+      source,
+      properties: { title },
+      preload: Infinity,
+      visible: this.baseLayerType() === type
+    });
   }
 
   /**
@@ -150,10 +141,10 @@ export class MapService {
    * @param {HTMLElement} element El elemento DOM que representa el marcador.
    */
   updateUserLocationOverlay(transformedCoords: number[], element: HTMLElement): void {
-    element.style.display = 'flex';
     this.locationOverlay = this.getOrCreateOverlay(this.locationOverlay, element, {
       positioning: 'center-center'
     });
+    element.style.display = 'flex';
     this.locationOverlay.setPosition(transformedCoords);
   }
 
@@ -163,12 +154,12 @@ export class MapService {
    * @param {HTMLElement} element El elemento DOM que representa el popup.
    */
   showLocationPopup(transformedCoords: number[], element: HTMLElement): void {
-    element.style.display = 'block';
     this.popupOverlay = this.getOrCreateOverlay(this.popupOverlay, element, {
       positioning: 'bottom-center',
       stopEvent: true,
       offset: [0, -15]
     });
+    element.style.display = 'block';
     this.popupOverlay.setPosition(transformedCoords);
   }
 
@@ -208,22 +199,18 @@ export class MapService {
 
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const coords = [position.coords.longitude, position.coords.latitude];
-          const transformedCoords = fromLonLat(coords);
           const result = { lon: position.coords.longitude, lat: position.coords.latitude };
+          const transformedCoords = fromLonLat([result.lon, result.lat]);
 
           this.updateUserLocationOverlay(transformedCoords, markerElement);
           this.showLocationPopup(transformedCoords, popupElement);
           this.userCoords.set(result);
 
-          const view = this.map?.getView();
-          if (view) {
-            view.animate({
-              center: transformedCoords,
-              zoom: ZOOM_LEVEL_LOCATION,
-              duration: ANIMATION_DURATION
-            });
-          }
+          this.map?.getView().animate({
+            center: transformedCoords,
+            zoom: ZOOM_LEVEL_LOCATION,
+            duration: ANIMATION_DURATION
+          });
 
           resolve(result);
         },
@@ -239,14 +226,11 @@ export class MapService {
   toggleBaseLayer(): void {
     if (!this.map || !this.satelliteLayer || !this.streetsLayer) return;
 
-    const isSatellite = this.baseLayerType() === 'satellite';
-    const newType = isSatellite ? 'streets' : 'satellite';
-
-    // Cambio de visibilidad para un efecto limpio (sin parpadeos de carga)
-    this.satelliteLayer.setVisible(!isSatellite);
-    this.streetsLayer.setVisible(isSatellite);
-
+    const newType = this.baseLayerType() === 'satellite' ? 'streets' : 'satellite';
     this.baseLayerType.set(newType);
+
+    this.satelliteLayer.setVisible(newType === 'satellite');
+    this.streetsLayer.setVisible(newType === 'streets');
   }
 
   /**
@@ -285,25 +269,6 @@ export class MapService {
     if (view && currentZoom !== undefined) {
       view.animate({ zoom: currentZoom + delta, duration: 250 });
     }
-  }
-
-  /**
-   * Genera la URL de la leyenda para una capa dada (WMS).
-   * @param layer Capa de OpenLayers.
-   * @returns URL del GetLegendGraphic o undefined si no aplica.
-   */
-  getLegendUrl(layer: any): string | undefined {
-    if (typeof layer.getSource !== 'function') return undefined;
-    const source = layer.getSource();
-
-    if (source && typeof source.getParams === 'function') {
-      const params = source.getParams();
-      const layerName = params.LAYERS || params.layers;
-      if (layerName) {
-        return `${GEOSERVER_WMS_URL}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layerName}`;
-      }
-    }
-    return undefined;
   }
 
 }
