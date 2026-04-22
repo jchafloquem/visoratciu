@@ -6,7 +6,7 @@ import { OlMap } from '../../modules/openlayers.module';
 
 import { Menubar } from '../menubar/menubar';
 import { Sidebar } from '../sidebar/sidebar';
-import { OverViewComponent } from './components/over-view/over-view';
+
 
 /**
  * Componente principal de la interfaz del mapa.
@@ -21,7 +21,7 @@ import { OverViewComponent } from './components/over-view/over-view';
     FormsModule,
     Menubar,
     Sidebar,
-    OverViewComponent,
+
 
   ],
   templateUrl: './map.html',
