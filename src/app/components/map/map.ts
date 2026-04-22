@@ -6,8 +6,13 @@ import { OlMap } from '../../modules/openlayers.module';
 
 import { Menubar } from '../menubar/menubar';
 import { Sidebar } from '../sidebar/sidebar';
+import { OverViewComponent } from './components/over-view/over-view';
 
-
+/**
+ * Componente principal de la interfaz del mapa.
+ * Coordina la visualización de la barra de herramientas, barra lateral y los controles
+ * interactivos del mapa central.
+ */
 @Component({
   selector: 'app-map',
   standalone: true,
@@ -15,22 +20,31 @@ import { Sidebar } from '../sidebar/sidebar';
     CommonModule,
     FormsModule,
     Menubar,
-    Sidebar
+    Sidebar,
+    OverViewComponent,
+
   ],
   templateUrl: './map.html',
   styleUrl: './map.css',
 })
 export class MapComponent {
+  /** Referencia al contenedor principal donde se inyecta el lienzo de OpenLayers */
   @ViewChild('mapContainer') mapContainer!: ElementRef;
+  /** Referencia al elemento HTML que se utiliza como marcador de ubicación del usuario */
   @ViewChild('userMarker') userMarker!: ElementRef;
+  /** Referencia al elemento HTML del popup informativo de ubicación */
   @ViewChild('locationPopup') locationPopup!: ElementRef;
 
   private mapService = inject(MapService);
   private cdr = inject(ChangeDetectorRef);
 
+  /** Referencia a la instancia de OpenLayers expuesta por el servicio */
   olMap?: OlMap;
+  /** Signal que indica si el mapa ya terminó su carga inicial */
   isReady = this.mapService.isReady;
+  /** Signal con las coordenadas actuales obtenidas por GPS */
   userCoords = this.mapService.userCoords;
+  /** Signal que define si se muestra el mapa base de satélite o de calles */
   baseLayerType = this.mapService.baseLayerType;
 
   constructor() {
@@ -39,6 +53,11 @@ export class MapComponent {
       this.initMap();
     });
   }
+
+  /**
+   * Solicita al servicio la creación de la instancia de OpenLayers pasando el
+   * contenedor nativo del componente.
+   */
   private initMap(): void {
     // Utilizamos el servicio para inicializar el mapa centralizando la lógica
     this.olMap = this.mapService.initMap(this.mapContainer.nativeElement);

@@ -3,7 +3,6 @@ import {
   defaultControls,
   fromLonLat,
   OlMap,
-  OverviewMap,
   Overlay,
   OverlayPositioning,
   TileLayer,
@@ -21,8 +20,10 @@ const GOOGLE_SATELLITE_URL = 'https://mt1.google.com/vt/lyrs=s&hl=es&x={x}&y={y}
 const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 /** Duración de las animaciones del mapa en milisegundos */
 const ANIMATION_DURATION = 1000;
+/** URL base para las peticiones WMS de GeoServer */
+const GEOSERVER_WMS_URL = 'https://geoserver.ue003cofopri.gob.pe/geoserver/wms';
 /** Nivel de zoom al que se acerca el mapa al obtener la ubicación del usuario */
-const ZOOM_LEVEL_LOCATION = 17;
+const ZOOM_LEVEL_LOCATION = 20;
 
 /**
  * Servicio de Angular para la gestión del mapa OpenLayers.
@@ -39,8 +40,14 @@ export class MapService {
   private locationOverlay?: Overlay;
   /** Overlay para mostrar un popup con información de la ubicación */
   private popupOverlay?: Overlay;
+  /** Capa de imágenes satelitales (Google) */
   private satelliteLayer?: TileLayer;
+  /** Capa de calles (OSM) */
   private streetsLayer?: TileLayer;
+  /** Fuente de datos para la capa satelital */
+  private satelliteSource?: XYZ;
+  /** Fuente de datos para la capa de calles */
+  private streetsSource?: XYZ;
 
   /**
    * Signal que indica si el mapa ha sido inicializado y está listo para su uso.
@@ -71,26 +78,26 @@ export class MapService {
     // Evita inicializar el mapa si ya existe
     if (this.map) return this.map;
 
-    const satelliteSource = new XYZ({
+    this.satelliteSource = new XYZ({
       url: GOOGLE_SATELLITE_URL,
       crossOrigin: 'anonymous'
     });
 
-    const streetsSource = new XYZ({
+    this.streetsSource = new XYZ({
       url: OSM_URL,
       crossOrigin: 'anonymous'
     });
 
     // Inicializamos ambas capas con preload para zoom fluido
     this.satelliteLayer = new TileLayer({
-      source: satelliteSource,
+      source: this.satelliteSource,
       properties: { title: 'Satélite' },
       preload: Infinity,
       visible: this.baseLayerType() === 'satellite'
     });
 
     this.streetsLayer = new TileLayer({
-      source: streetsSource,
+      source: this.streetsSource,
       properties: { title: 'Calles' },
       preload: Infinity,
       visible: this.baseLayerType() === 'streets'
@@ -98,19 +105,13 @@ export class MapService {
 
     this.map = new OlMap({
       target,
-      controls: defaultControls({ zoom: false }).extend([
-        new OverviewMap({
-          layers: [new TileLayer({ source: satelliteSource, preload: Infinity })],
-          collapsed: false,
-        })
-      ]),
+      controls: defaultControls({ zoom: false }),
       layers: [this.satelliteLayer, this.streetsLayer],
       view: new View({
         center: fromLonLat(INITIAL_CENTER),
         zoom: INITIAL_ZOOM,
       }),
     });
-
     this.isReady.set(true);
     return this.map;
   }
@@ -245,22 +246,12 @@ export class MapService {
     this.satelliteLayer.setVisible(!isSatellite);
     this.streetsLayer.setVisible(isSatellite);
 
-    // Sincronizar el OverviewMap (el mapa pequeño de la esquina)
-    const ovControl = this.map.getControls().getArray().find(c => c instanceof OverviewMap) as OverviewMap;
-    if (ovControl) {
-      const ovMap = ovControl.getOverviewMap();
-      const ovLayer = ovMap.getLayers().getArray()[0] as TileLayer;
-
-      // Actualizamos la fuente del overview para que coincida con el mapa principal
-      ovLayer.setSource(isSatellite
-        ? this.streetsLayer.getSource()!
-        : this.satelliteLayer.getSource()!
-      );
-    }
-
     this.baseLayerType.set(newType);
   }
 
+  /**
+   * Centra el mapa en la posición inicial definida para Perú.
+   */
   goHome(): void {
     this.map?.getView()?.animate({
       center: fromLonLat(INITIAL_CENTER),
@@ -269,14 +260,25 @@ export class MapService {
     });
   }
 
+  /**
+   * Reduce el nivel de zoom en una unidad.
+   */
   zoomOut(): void {
     this.adjustZoom(-1);
   }
 
+  /**
+   * Aumenta el nivel de zoom en una unidad.
+   */
   zoomIn(): void {
     this.adjustZoom(1);
   }
 
+  /**
+   * Realiza una animación de cambio de zoom relativa al valor actual.
+   * @private
+   * @param {number} delta Cantidad de niveles de zoom a sumar o restar.
+   */
   private adjustZoom(delta: number): void {
     const view = this.map?.getView();
     const currentZoom = view?.getZoom();
@@ -285,11 +287,23 @@ export class MapService {
     }
   }
 
-  destroyMap(): void {
-    if (this.map) {
-      this.map.setTarget(undefined);
-      this.map = undefined;
-      this.isReady.set(false);
+  /**
+   * Genera la URL de la leyenda para una capa dada (WMS).
+   * @param layer Capa de OpenLayers.
+   * @returns URL del GetLegendGraphic o undefined si no aplica.
+   */
+  getLegendUrl(layer: any): string | undefined {
+    if (typeof layer.getSource !== 'function') return undefined;
+    const source = layer.getSource();
+
+    if (source && typeof source.getParams === 'function') {
+      const params = source.getParams();
+      const layerName = params.LAYERS || params.layers;
+      if (layerName) {
+        return `${GEOSERVER_WMS_URL}?REQUEST=GetLegendGraphic&VERSION=1.0.0&FORMAT=image/png&LAYER=${layerName}`;
+      }
     }
+    return undefined;
   }
+
 }

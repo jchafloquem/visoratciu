@@ -1,6 +1,8 @@
 <app-menubar></app-menubar>
 <app-sidebar></app-sidebar>
+
 <div #mapContainer class="map-container"></div>
+<app-over-view></app-over-view>
 
 <!-- Marcador de Usuario Animado (Overlay) -->
 <div #userMarker id="userMarker" class="relative flex h-6 w-6 items-center justify-center">
@@ -27,9 +29,6 @@
     Borrar punto
   </button>
 </div>
-
-
-
 
 <!-- Controles de Zoom Personalizados -->
 @if (isReady()) {

@@ -26,10 +26,3 @@
 #locationPopup {
   display: none;
 }
-
-/* Posiciona el OverviewMap a la derecha */
-::ng-deep .ol-overviewmap {
-  left: auto !important;
-  right: 0.5em !important;
-  bottom: 0.5em !important;
-}
