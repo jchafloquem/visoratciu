@@ -3,7 +3,6 @@
 
 <div #mapContainer class="map-container"></div>
 
-
 <!-- Marcador de Usuario Animado (Overlay) -->
 <div #userMarker id="userMarker" class="relative flex h-6 w-6 items-center justify-center">
   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
@@ -32,6 +31,7 @@
 
 <!-- Controles de Zoom Personalizados -->
 @if (isReady()) {
+  <!-- Mapa de vista general -->
   <div class="fixed right-6 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-50 animate-in fade-in duration-500">
     <button (click)="zoomIn()"
             class="w-10 h-10 flex items-center justify-center bg-primary backdrop-blur-md text-white rounded-xl shadow-lg border border-white/20 hover:bg-secondary hover:scale-105 transition-all active:scale-95"
@@ -59,4 +59,5 @@
       <i class="bi text-xl" [class.bi-map]="baseLayerType() === 'satellite'" [class.bi-layers-half]="baseLayerType() === 'streets'"></i>
     </button>
   </div>
+  <app-overview-map [mainMap]="olMap!"></app-overview-map>
 }

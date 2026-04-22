@@ -1,0 +1,117 @@
+/* 1. CONTENEDOR PRINCIPAL (ESTADO EXPANDIDO) */
+::ng-deep .custom-overview:not(.ol-collapsed) {
+  width: 192px !important;  /* Equivalente a w-48 */
+  height: 192px !important; /* Equivalente a h-48 */
+  background-color: #194a8b !important; /* Azul institucional */
+  border: 3px solid #103461 !important;  /* Borde grueso oscuro */
+  border-radius: 8px !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* 2. RESET TOTAL DEL MAPA INTERNO */
+/* Evita que el mapa se pierda o se desplace a la derecha */
+::ng-deep .custom-overview .ol-overviewmap-map {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Forzar el viewport de OpenLayers a ocupar todo el espacio */
+::ng-deep .custom-overview .ol-viewport {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* 3. EL BOTÓN - POSICIÓN FIJA (ANCLADO ARRIBA A LA DERECHA) */
+::ng-deep .custom-overview .ol-overviewmap-button {
+  position: absolute !important;
+  top: 5px !important;
+  right: 5px !important;
+  z-index: 2000 !important; /* Siempre por encima del mapa */
+
+  background-color: #194a8b !important;
+  border: 2px solid #ffffff !important; /* Borde blanco para contraste */
+  color: white !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 4px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-weight: bold !important;
+  cursor: pointer !important;
+}
+
+/* Efecto hover para el botón */
+::ng-deep .custom-overview .ol-overviewmap-button:hover {
+  background-color: #103461 !important;
+  border-color: #194a8b !important;
+}
+
+/* 4. ESTADO COLAPSADO (MINIMIZADO) */
+::ng-deep .custom-overview.ol-collapsed {
+  width: 40px !important;  /* Tamaño suficiente para el botón */
+  height: 40px !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Ocultar el mapa al cerrar para evitar solapamientos */
+::ng-deep .custom-overview.ol-collapsed .ol-overviewmap-map {
+  display: none !important;
+}
+
+/* Asegurar que el botón NO se mueva al colapsar */
+::ng-deep .custom-overview.ol-collapsed .ol-overviewmap-button {
+  top: 5px !important;
+  right: 5px !important;
+  margin: 0 !important;
+}
+
+/* 5. EL RECUADRO ROJO (ÁREA DE VISIÓN) */
+::ng-deep .ol-overviewmap-box {
+  border: 2px solid #ff0000 !important; /* Rojo intenso */
+  background-color: rgba(255, 0, 0, 0.2) !important; /* Fondo traslúcido */
+  box-sizing: border-box !important;
+  cursor: move !important;
+  z-index: 10 !important;
+}
+
+/* Hover para el recuadro rojo */
+::ng-deep .ol-overviewmap-box:hover {
+  border-color: #ff5555 !important;
+  background-color: rgba(255, 0, 0, 0.3) !important;
+}
+/* Esto obliga al lienzo del mapa a volver al origen (0,0) de tu div azul */
+::ng-deep .custom-overview .ol-viewport,
+::ng-deep .custom-overview .ol-unselectable,
+::ng-deep .custom-overview canvas {
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  position: absolute !important;
+}
+/* Fuerza al canvas y a todos los contenedores de OL a quedarse en la esquina 0,0 */
+::ng-deep .custom-overview .ol-overviewmap-map,
+::ng-deep .custom-overview .ol-viewport,
+::ng-deep .custom-overview canvas {
+  left: 0 !important;
+  top: 0 !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important; /* Evita que OL lo desplace con matrices */
+  width: 100% !important;
+  height: 100% !important;
+}

@@ -1,11 +1,16 @@
 import { Component, ElementRef, ViewChild, afterNextRender, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
+// Servicios y módulos
 import { MapService } from '../../services/map.service';
 import { OlMap } from '../../modules/openlayers.module';
 
+// Componentes relacionados
 import { Menubar } from '../menubar/menubar';
 import { Sidebar } from '../sidebar/sidebar';
+import { OverviewMapComponent } from './components/overViewMap/overview-map';
+
 
 
 /**
@@ -21,7 +26,7 @@ import { Sidebar } from '../sidebar/sidebar';
     FormsModule,
     Menubar,
     Sidebar,
-
+    OverviewMapComponent
 
   ],
   templateUrl: './map.html',

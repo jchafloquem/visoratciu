@@ -1,6 +1,5 @@
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 import {
-  defaultControls,
   fromLonLat,
   OlMap,
   Overlay,
@@ -17,7 +16,7 @@ export const INITIAL_ZOOM = 6;
 /** URL del servicio de mapas satelitales de Google */
 const GOOGLE_SATELLITE_URL = 'https://mt1.google.com/vt/lyrs=s&hl=es&x={x}&y={y}&z={z}';
 /** URL del servicio de mapas de calles (OpenStreetMap) */
-const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+export const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 /** Duración de las animaciones del mapa en milisegundos */
 const ANIMATION_DURATION = 1000;
 /** Nivel de zoom al que se acerca el mapa al obtener la ubicación del usuario */
@@ -71,7 +70,10 @@ export class MapService {
    * Configura las capas base, controles y vista inicial.
    */
   initMap(target: HTMLElement): OlMap {
-    if (this.map) return this.map;
+    if (this.map) {
+      this.map.setTarget(target);
+      return this.map;
+    }
 
     // Inicialización de fuentes
     this.satelliteSource = new XYZ({ url: GOOGLE_SATELLITE_URL, crossOrigin: 'anonymous' });
@@ -83,7 +85,6 @@ export class MapService {
 
     this.map = new OlMap({
       target,
-      controls: defaultControls({ zoom: false }),
       layers: [this.satelliteLayer, this.streetsLayer],
       view: new View({
         center: fromLonLat(INITIAL_CENTER),
